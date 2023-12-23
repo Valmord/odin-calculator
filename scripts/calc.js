@@ -58,11 +58,19 @@ const firstOpDisplay = document.querySelector('.display-operand1')
 const operatorDisplay = document.querySelector('.display-operator');
 const secondOpDisplay = document.querySelector('.display-operand2');
 function updateDisplays(buttonId){
+  if (buttonId === 'backspace') {
+    secondOpDisplay.textContent = secondOpDisplay.textContent.slice(0,-1);
+    return;
+  }
   const firstOp = parseFloat(firstOpDisplay.textContent);
   const secondOp = parseFloat(secondOpDisplay.textContent);
   const operator = operatorDisplay.textContent;
   if (secondOpDisplay.textContent.slice(0,3) === 'ERR') return;
   if (!isNaN(buttonId)) {
+    if (priorCalc) {
+      secondOpDisplay.textContent = '';
+      priorCalc = false; 
+    }
     secondOpDisplay.textContent += buttonId;
     return;
   }
@@ -76,7 +84,11 @@ function updateDisplays(buttonId){
     if (firstOp && secondOp) {
       clearDisplays();
       secondOpDisplay.textContent = operate(firstOp, secondOp, operator);
+      if (secondOpDisplay.textContent.length>10) {
+        secondOpDisplay.textContent = secondOpDisplay.textContent.slice(0,10) + "...";
+      }
     }
+    priorCalc = true;
     return;
     } else if (firstOpDisplay.textContent && secondOpDisplay.textContent) {
     firstOpDisplay.textContent = operate(firstOp, secondOp, operator)
@@ -86,12 +98,14 @@ function updateDisplays(buttonId){
   }
   secondOpDisplay.textContent = '';
   operatorDisplay.textContent = buttonId;
+  priorCalc = false;
 };
 
 function clearDisplays(){
   firstOpDisplay.textContent = '';
   operatorDisplay.textContent = '';
-  secondOpDisplay.textContent = '';
+  secondOpDisplay.textContent = ''; 
+  priorCalc = false;
 }
 
 const buttons = document.querySelectorAll('.buttons');
@@ -104,3 +118,17 @@ buttons.forEach( button => {
     })
   }
 });
+
+document.body.addEventListener('keydown', e => {
+  const keyPressed = e.key.toLowerCase();
+  if (keyPressed.match(/[0123456789+-/*%=]/)){
+    updateDisplays(e.key.toLowerCase());
+  } else if (keyPressed === 'enter') {
+    updateDisplays('=');
+  } else if (keyPressed === 'backspace') {
+    updateDisplays('backspace');
+  }
+  
+})
+
+let priorCalc = false;
