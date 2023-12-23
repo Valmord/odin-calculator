@@ -69,8 +69,6 @@ function updateDisplays(buttonId){
     case '.':
       if (!sto.btm.includes('.')) updateBtmDisplay(sto.btm += '.');
       return;
-    case '=':
-      if (!sto.op) return;
   }
 
   if (!isNaN(buttonId)) {
@@ -81,6 +79,9 @@ function updateDisplays(buttonId){
       updateBtmDisplay(sto.btm = buttonId);
       sto.fresh = true;
     }
+  } else if (buttonId === '-' && !sto.btm) {
+      updateBtmDisplay(sto.btm += '-');
+      sto.fresh = true;
   } else if (operators.includes(buttonId) && (sto.top || sto.btm)) {
       if (sto.op && sto.btm) {
       sto.btm = operate()
@@ -92,8 +93,12 @@ function updateDisplays(buttonId){
       updateTopDisplay(sto.top,buttonId);
       sto.fresh = false;
   } else if (buttonId === '=' && sto.btm) {
-      updateTopDisplay(`${sto.top} ${sto.op} ${sto.btm}`, buttonId);
-      sto.btm = operate();
+      if (!sto.op) {
+        updateTopDisplay(sto.btm, buttonId);
+      } else {
+        updateTopDisplay(`${sto.top} ${sto.op} ${sto.btm}`, buttonId);
+        sto.btm = operate();
+      }
       sto.op = '';
       updateBtmDisplay(sto.btm);
       sto.fresh = false;
