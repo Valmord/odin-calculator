@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700;900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Roboto, sans-serif, serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+}
+
+.display {
+    height: 30px;
+    width: 300px;
+    padding-left: 10px;
+    background-color: lightgrey;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 300px;
+}
+
+.button-group {
+    display: flex;
+    gap: 5px;
+}
+
+.buttons {
+    background-color: red;
+    border-radius: 2px;
+    border-width: 0.5px;
+    border-style: groove;
+    flex: 1;
+}
