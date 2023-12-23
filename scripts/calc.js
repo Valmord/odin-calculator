@@ -27,36 +27,29 @@ function exp(a,b){
   return a ** b;
 }
 
-function operate(a, b, operator){
-  let value = 0;
+function operate(){
+  let [a, b, operator] = [parseFloat(sto.top), parseFloat(sto.btm), sto.op]
   switch(operator) {
     case '+':
-      value = add(a,b);
-      break;
+      return add(a,b);
     case '-':
-      value = sub(a,b);
-      break;
-    case '*':
-      value = mul(a,b);
-      break;
+      return sub(a,b);
+    case '×':
+      return mul(a,b);
     case '/':
-      value = div(a,b);
-      break;
+      return div(a,b);
     case '%':
-      value = mod(a,b);
-      break;
+      return mod(a,b);
     case '^':
-      value = exp(a,b);
-      break;
+      return exp(a,b);
     default:
-      value = 'ERR';
+      return 'ERR';
   }
-  return(value);
 }
 
 const topDisplay = document.querySelector('.top-display')
 const btmDisplay = document.querySelector('.bottom-display');
-const operators = ['+','-','*','/','^','%','-'];
+const operators = ['+','-','×','/','^','%','-'];
 const sto = {
   op: '',
   top: '',
@@ -84,28 +77,39 @@ function updateDisplays(buttonId){
     if (sto.fresh) {
       updateBtmDisplay(sto.btm += buttonId);
     } else {
+      //if not fresh i.e. was previous calculation, first clears display.
       updateBtmDisplay(sto.btm = buttonId);
       sto.fresh = true;
     }
   } else if (operators.includes(buttonId) && (sto.top || sto.btm)) {
-      if (sto.op) {
-      sto.btm = operate(parseFloat(sto.top), parseFloat(sto.btm), sto.op)
-    }
-    [sto.op, sto.top, sto.btm] = [buttonId, sto.btm, ''];
-    topDisplay.innerText = sto.top + ` ${buttonId} `;
-    sto.fresh = false;
+      if (sto.op && sto.btm) {
+      sto.btm = operate()
+      } else if (!sto.btm) {
+        sto.btm = sto.top
+        sto.btm = operate();
+      }
+      [sto.op, sto.top, sto.btm] = [buttonId, sto.btm, ''];
+      updateTopDisplay(sto.top,buttonId);
+      sto.fresh = false;
   } else if (buttonId === '=' && sto.btm) {
-    topDisplay.innerText = `${sto.top} ${sto.op} ${sto.btm} ${buttonId}`;
-    sto.btm = operate(parseFloat(sto.top), parseFloat(sto.btm), sto.op);
-    sto.op = '';
-    updateBtmDisplay(sto.btm);
-    sto.fresh = false;
+      updateTopDisplay(`${sto.top} ${sto.op} ${sto.btm}`, buttonId);
+      sto.btm = operate();
+      sto.op = '';
+      updateBtmDisplay(sto.btm);
+      sto.fresh = false;
   }
 }
 
-function updateTopDisplay(number){
+function updateTopDisplay(number, operator){
   const MAX_STR_LENGTH = 28;
   const strNum = number.toString();
+  let cLNum = strNum.substr(0, MAX_STR_LENGTH) + ` ${operator} `; //cL = correct length
+  if (strNum.includes('e') && strNum.length > MAX_STR_LENGTH - 3) { //-3 for ' op '
+    const strIndex = strNum.indexOf('e');
+    cLNum = strNum.substr(0,MAX_STR_LENGTH-(strNum.length-strIndex)) 
+    + strNum.substr(strIndex) + ` ${operator} `;
+  }
+  topDisplay.innerText = cLNum;
 }
 
 function updateBtmDisplay(number){

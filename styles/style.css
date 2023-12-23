@@ -94,6 +94,10 @@
     font-size: 20px;
 }
 
+.buttons:hover {
+    opacity: 0.5;
+}
+
 .operators {
     background-color: #666464;
 }
