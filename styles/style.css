@@ -18,6 +18,19 @@ body {
     width: 300px;
     padding-left: 10px;
     background-color: lightgrey;
+    display: flex;
+    gap: 5px;
+}
+
+.display-operand1, .display-operator {
+    font-weight: bold;
+    color: grey;
+}
+
+.display-operand2 {
+    margin-left: auto;
+    flex: 1;
+    justify-self: end;
 }
 
 .button-container {
