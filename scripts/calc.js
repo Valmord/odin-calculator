@@ -28,95 +28,88 @@ function exp(a,b){
 }
 
 function operate(a, b, operator){
-  let sum = 0;
+  let value = 0;
   switch(operator) {
     case '+':
-      sum = add(a,b);
+      value = add(a,b);
       break;
     case '-':
-      sum = sub(a,b);
+      value = sub(a,b);
       break;
     case '*':
-      sum = mul(a,b);
+      value = mul(a,b);
       break;
     case '/':
-      sum = div(a,b);
+      value = div(a,b);
       break;
     case '%':
-      sum = mod(a,b);
+      value = mod(a,b);
       break;
     case '^':
-      sum = exp(a,b);
+      value = exp(a,b);
       break;
     default:
-      sum = 'ERR';
+      value = 'ERR';
   }
-  return(sum);
+  return(value);
 }
 
-const firstOpDisplay = document.querySelector('.display-operand1')
-const operatorDisplay = document.querySelector('.display-operator');
-const secondOpDisplay = document.querySelector('.display-operand2');
+const topDisplay = document.querySelector('.top-display')
+const btmDisplay = document.querySelector('.bottom-display');
+const operators = ['+','-','*','/','^','%','-'];
+const sto = {
+  op: '',
+  top: '',
+  btm: ''
+}
+
 function updateDisplays(buttonId){
-  if (buttonId === 'backspace') {
-    secondOpDisplay.textContent = secondOpDisplay.textContent.slice(0,-1);
-    return;
-  }
-  const firstOp = parseFloat(firstOpDisplay.textContent);
-  const secondOp = parseFloat(secondOpDisplay.textContent);
-  const operator = operatorDisplay.textContent;
-  if (secondOpDisplay.textContent.slice(0,3) === 'ERR') return;
-  if (!isNaN(buttonId)) {
-    if (priorCalc) {
-      secondOpDisplay.textContent = '';
-      priorCalc = false; 
-    }
-    secondOpDisplay.textContent += buttonId;
-    return;
-  }
-  if (buttonId === '.') {
-    if (secondOpDisplay.textContent.includes('.')) return;
-    secondOpDisplay.textContent += buttonId;
-    return;
+  // let btm = btmDisplay.innerText;
+  switch(buttonId){
+    case 'backspace':
+      btmDisplay.innerText = (sto.btm = sto.btm.slice(0,-1));
+      return;
+    case 'clr':
+      clearDisplays();
+      return;
+    case '.':
+      if (!sto.btm.includes('.')) btmDisplay.innerText += '.';
+      return;
+    case '=':
+      if (!sto.op) return;
   }
 
-  if (buttonId === '=') {
-    if (firstOp && secondOp) {
-      clearDisplays();
-      secondOpDisplay.textContent = operate(firstOp, secondOp, operator);
-      if (secondOpDisplay.textContent.length>10) {
-        secondOpDisplay.textContent = secondOpDisplay.textContent.slice(0,10) + "...";
-      }
+  if (!isNaN(buttonId)) {
+    btmDisplay.innerText = (sto.btm += buttonId)
+  } else if (operators.includes(buttonId)) {
+      if (sto.op) {
+      sto.btm = operate(parseFloat(sto.top), parseFloat(sto.btm), sto.op)
     }
-    priorCalc = true;
-    return;
-    } else if (firstOpDisplay.textContent && secondOpDisplay.textContent) {
-    firstOpDisplay.textContent = operate(firstOp, secondOp, operator)
-  } else if (!secondOp) {
-  } else {
-    firstOpDisplay.textContent = secondOp;
+    [sto.op, sto.top, sto.btm] = [buttonId, sto.btm, ''];
+    topDisplay.innerText = sto.top + ` ${buttonId} `;
+  } else if (buttonId === '=') {
+    topDisplay.innerText = `${sto.top} ${sto.op} ${sto.btm} ${buttonId}`;
+    sto.btm = operate(parseFloat(sto.top), parseFloat(sto.btm), sto.op);
+    sto.op = '';
+    btmDisplay.innerText = sto.btm;
   }
-  secondOpDisplay.textContent = '';
-  operatorDisplay.textContent = buttonId;
-  priorCalc = false;
-};
+}
+
+function updateNumber(number){
+  return;
+}
 
 function clearDisplays(){
-  firstOpDisplay.textContent = '';
-  operatorDisplay.textContent = '';
-  secondOpDisplay.textContent = ''; 
-  priorCalc = false;
+  topDisplay.textContent = '';
+  btmDisplay.textContent = '';
+  [sto.top, sto.btm, sto.op] = ['','',''];
 }
 
 const buttons = document.querySelectorAll('.buttons');
 buttons.forEach( button => {
-  if (button.id === 'clr') {
-    button.onclick = clearDisplays;
-  } else {
-    button.addEventListener( 'click', () => {
-      updateDisplays(button.id);
-    })
-  }
+  button.addEventListener( 'click', () => {
+    updateDisplays(button.id);
+  });
 });
 
 document.body.addEventListener('keydown', e => {
@@ -130,5 +123,3 @@ document.body.addEventListener('keydown', e => {
   }
   
 })
-
-let priorCalc = false;
