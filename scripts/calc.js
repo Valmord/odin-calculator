@@ -14,7 +14,7 @@ function mul(a,b){
 
 function div(a,b){
   if (b === 0) {
-    return "ERR - Cannot Divide by Zero";
+    return "ERR Cant Divide by Zero";
   }
 return a / b;
 }
@@ -60,43 +60,69 @@ const operators = ['+','-','*','/','^','%','-'];
 const sto = {
   op: '',
   top: '',
-  btm: ''
+  btm: '',
+  fresh: true
 }
 
 function updateDisplays(buttonId){
-  // let btm = btmDisplay.innerText;
+  if (topDisplay.textContent.substring(0,3) === 'ERR') clearDisplays();
   switch(buttonId){
     case 'backspace':
-      btmDisplay.innerText = (sto.btm = sto.btm.slice(0,-1));
+      updateBtmDisplay(sto.btm = sto.btm.toString().slice(0,-1));
       return;
     case 'clr':
       clearDisplays();
       return;
     case '.':
-      if (!sto.btm.includes('.')) btmDisplay.innerText += '.';
+      if (!sto.btm.includes('.')) updateBtmDisplay(sto.btm += '.');
       return;
     case '=':
       if (!sto.op) return;
   }
 
   if (!isNaN(buttonId)) {
-    btmDisplay.innerText = (sto.btm += buttonId)
-  } else if (operators.includes(buttonId)) {
+    if (sto.fresh) {
+      updateBtmDisplay(sto.btm += buttonId);
+    } else {
+      updateBtmDisplay(sto.btm = buttonId);
+      sto.fresh = true;
+    }
+  } else if (operators.includes(buttonId) && (sto.top || sto.btm)) {
       if (sto.op) {
       sto.btm = operate(parseFloat(sto.top), parseFloat(sto.btm), sto.op)
     }
     [sto.op, sto.top, sto.btm] = [buttonId, sto.btm, ''];
     topDisplay.innerText = sto.top + ` ${buttonId} `;
-  } else if (buttonId === '=') {
+    sto.fresh = false;
+  } else if (buttonId === '=' && sto.btm) {
     topDisplay.innerText = `${sto.top} ${sto.op} ${sto.btm} ${buttonId}`;
     sto.btm = operate(parseFloat(sto.top), parseFloat(sto.btm), sto.op);
     sto.op = '';
-    btmDisplay.innerText = sto.btm;
+    updateBtmDisplay(sto.btm);
+    sto.fresh = false;
   }
 }
 
-function updateNumber(number){
-  return;
+function updateTopDisplay(number){
+  const MAX_STR_LENGTH = 28;
+  const strNum = number.toString();
+}
+
+function updateBtmDisplay(number){
+  const MAX_STR_LENGTH = 20;
+  const strNum = number.toString();
+  let cLNum = strNum; // cL = correct length number
+  if (strNum.includes('ERR')) {
+    //skip
+  } else if (strNum.includes('e')) {
+    const strIndex = strNum.indexOf('e');
+    cLNum = strNum.substr(0,MAX_STR_LENGTH-(strNum.length-strIndex)) + strNum.substr(strIndex);
+  } else if (strNum.length > MAX_STR_LENGTH && strNum.includes('.')) {
+    cLNum = strNum.substr(0,MAX_STR_LENGTH);
+  } else if (strNum.length > MAX_STR_LENGTH-1) {
+    cLNum = strNum.substr(0,MAX_STR_LENGTH-2  ) + "…"
+  }
+  btmDisplay.innerText = cLNum;
 }
 
 function clearDisplays(){
