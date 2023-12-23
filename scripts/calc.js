@@ -62,16 +62,19 @@ function updateDisplays(buttonId){
   switch(buttonId){
     case 'backspace':
       updateBtmDisplay(sto.btm = sto.btm.toString().slice(0,-1));
+      sto.top = sto.btm;
       return;
     case 'clr':
       clearDisplays();
       return;
     case '.':
+      if (!sto.btm) sto.btm = '0';
       if (!sto.btm.includes('.')) updateBtmDisplay(sto.btm += '.');
       return;
   }
 
   if (!isNaN(buttonId)) {
+    if (sto.btm === '0') sto.btm = '';
     if (sto.fresh) {
       updateBtmDisplay(sto.btm += buttonId);
     } else {
@@ -79,26 +82,29 @@ function updateDisplays(buttonId){
       updateBtmDisplay(sto.btm = buttonId);
       sto.fresh = true;
     }
-  } else if (buttonId === '-' && !sto.btm) {
+  } else if (buttonId === '-' && !sto.btm) { 
       updateBtmDisplay(sto.btm += '-');
       sto.fresh = true;
   } else if (operators.includes(buttonId) && (sto.top || sto.btm)) {
       if (sto.op && sto.btm) {
-      sto.btm = operate()
+      sto.top = operate();
       } else if (!sto.btm) {
         sto.btm = sto.top
         sto.btm = operate();
       }
-      [sto.op, sto.top, sto.btm] = [buttonId, sto.btm, ''];
+      if (!sto.top) sto.top = sto.btm;
+      sto.op = buttonId;
       updateTopDisplay(sto.top,buttonId);
       sto.fresh = false;
-  } else if (buttonId === '=' && sto.btm) {
+  } else if (buttonId === '=' && (sto.top || sto.btm)) {
       if (!sto.op) {
         updateTopDisplay(sto.btm, buttonId);
       } else {
-        updateTopDisplay(`${sto.top} ${sto.op} ${sto.btm}`, buttonId);
-        sto.btm = operate();
+          if (!sto.btm) sto.btm = sto.top;
+          updateTopDisplay(`${sto.top} ${sto.op} ${sto.btm}`, buttonId);
+          sto.btm = operate();
       }
+      sto.top = sto.btm;
       sto.op = '';
       updateBtmDisplay(sto.btm);
       sto.fresh = false;
@@ -149,12 +155,14 @@ buttons.forEach( button => {
 
 document.body.addEventListener('keydown', e => {
   const keyPressed = e.key.toLowerCase();
-  if (keyPressed.match(/[0123456789+-/*%=]/)){
+  if (keyPressed.match(/[0123456789+-/%=]/)){
     updateDisplays(e.key.toLowerCase());
   } else if (keyPressed === 'enter') {
     updateDisplays('=');
   } else if (keyPressed === 'backspace') {
     updateDisplays('backspace');
+  } else if (keyPressed === "*") {
+    updateDisplays('×');
   }
   
 })
