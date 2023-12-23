@@ -58,7 +58,7 @@ const sto = {
 }
 
 function updateDisplays(buttonId){
-  if (topDisplay.textContent.substring(0,3) === 'ERR') clearDisplays();
+  if (btmDisplay.textContent.substring(0,3) === 'ERR') clearDisplays();
   switch(buttonId){
     case 'backspace':
       updateBtmDisplay(sto.btm = sto.btm.toString().slice(0,-1));
@@ -68,8 +68,11 @@ function updateDisplays(buttonId){
       clearDisplays();
       return;
     case '.':
-      if (!sto.btm) sto.btm = '0';
-      if (!sto.btm.includes('.')) updateBtmDisplay(sto.btm += '.');
+      if (!sto.btm) {
+        sto.btm = '0';
+      } 
+      if (!sto.btm.toString().includes('.')) updateBtmDisplay(sto.btm += '.');
+      sto.fresh = true;
       return;
   }
 
@@ -86,13 +89,13 @@ function updateDisplays(buttonId){
       updateBtmDisplay(sto.btm += '-');
       sto.fresh = true;
   } else if (operators.includes(buttonId) && (sto.top || sto.btm)) {
-      if (sto.op && sto.btm) {
+      if (sto.op && sto.btm && (sto.op===buttonId || sto.fresh))  {
       sto.top = operate();
       } else if (!sto.btm) {
         sto.btm = sto.top
         sto.btm = operate();
       }
-      if (!sto.top) sto.top = sto.btm;
+      if (!sto.op) sto.top = sto.btm;
       sto.op = buttonId;
       updateTopDisplay(sto.top,buttonId);
       sto.fresh = false;
